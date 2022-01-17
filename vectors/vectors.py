@@ -3,20 +3,27 @@ from __future__ import division
 from functools import reduce
 import math
 from numbers import Real
-from collections import namedtuple
+from typing import NamedTuple
 
-class Point(namedtuple("Point", ["x", "y", "z"])):
+class Point(NamedTuple):
+    x: float
+    y: float
+    z: float
+
     def __sub__(self, pt):
         """Return a Point instance as the displacement of two points."""
-        if not isinstance(pt, Point):
+        if not isinstance(pt, type(self)):
             raise TypeError
-        return Point(*[a-b for a, b in zip(self, pt)])
+        return self.__class__(*[a-b for a, b in zip(self, pt)])
 
     def __add__(self, pt):
         if not isinstance(pt, Point):
             raise TypeError
-        return Point(*[a+b for a, b in zip(self, pt)])
+        return self.__class__(*[a+b for a, b in zip(self, pt)])
 
+    def to_dict(self):
+        return self._asdict()
+    
     def to_list(self):
         '''Returns an array of [x,y,z] of the end points'''
         return list(self) 
@@ -24,14 +31,10 @@ class Point(namedtuple("Point", ["x", "y", "z"])):
     @classmethod
     def from_list(cls, l):
         """Return a Point instance from a given list"""
-        if len(l) == 3:
-                x, y, z = map(float, l)
-                return cls(x, y, z)
-        elif len(l) == 2:
-            x, y = map(float, l)
-            return cls(x, y)
-        else:
-            raise AttributeError
+        if 2 <= len(l) <= 3:
+            return cls(*l)
+        raise AttributeError
+
 
 class Vector(Point):
     """Vector class: Representing a vector in 3D space.
@@ -42,67 +45,53 @@ class Vector(Point):
     Cylindrical coordinates in the r, theta, z space.(Cylindrical class method)
     """
 
-    def __init__(self, x, y, z):
-        '''Vectors are created in rectangular coordinates
+    def __new__(cls, *args, **kwargs):
+        return super(Vector, cls).__new__(cls, *args, **kwargs)
 
-        to create a vector in spherical or cylindrical
-        see the class methods
-        '''
-        super(Vector, self).__init__(x, y, z)
-
-    def __add__(self, vec):
+    def __add__(self, obj):
         """Add two vectors together"""
-        if(type(vec) == type(self)):
-            return Vector(self.x + vec.x, self.y + vec.y, self.z + vec.z)
-        elif isinstance(vec, Real):
-            return self.add(vec)
-        else:
-            raise TypeError
+        if type(obj) is type(self):
+            return self + obj
+        elif isinstance(obj, Real):
+            return self.add(obj)
+        raise TypeError
 
-    def __sub__(self, vec):
+    def __sub__(self, obj):
         """Subtract two vectors"""
-        if(type(vec) == type(self)):
-            return Vector(self.x - vec.x, self.y - vec.y, self.z - vec.z)
-        elif isinstance(vec, Real):
-            return Vector(self.x - vec, self.y - vec, self.z - vec)
-        else:
-            raise TypeError
+        if type(obj) is type(self):
+            return self - obj
+        elif isinstance(obj, Real):
+            return self.subtract(obj)
+        raise TypeError
 
-    def __mul__(self, anotherVector):
+    def __mul__(self, obj):
         """Return a Vector instance as the cross product of two vectors"""
-        return self.cross(anotherVector)
-
-    def __str__(self):
-        return "{0},{1},{2}".format(self.x, self.y, self.z)
+        if type(obj) is type(self):
+            return self.cross(obj)
+        elif isinstance(obj, Real):
+            return self.__class__(*[value*obj for value in self])
+        raise TypeError
 
     def __round__(self, n=None):
         if n is not None:
             return Vector(round(self.x, n), round(self.y, n), round(self.z, n))
         return Vector(round(self.x), round(self.y), round(self.z))
 
-    def add(self, number):
-        """Return a Vector as the product of the vector and a real number."""
-        return self.from_list([x + number for x in self.to_list()])
+    def add(self, obj):
+        return self + obj
+
+    def subtract(self, obj):
+        return self - obj
 
     def multiply(self, number):
-        """Return a Vector as the product of the vector and a real number."""
-        return self.from_list([x * number for x in self.to_list()])
+        return self * number
 
     def magnitude(self):
         """Return magnitude of the vector."""
-        return math.sqrt(
-            reduce(lambda x, y: x + y, [x ** 2 for x in self.to_list()])
-        )
+        return math.sqrt(sum([x ** 2 for x in self]))
 
     def sum(self, vector):
-        """Return a Vector instance as the vector sum of two vectors."""
-        return self.from_list(
-            [self.to_list()[i] + vector.to_list()[i] for i in range(3)]
-        )
-
-    def subtract(self, vector):
-        """Return a Vector instance as the vector difference of two vectors."""
-        return self.__sub__(vector)
+        return self + vector
 
     def dot(self, vector, theta=None):
         """Return the dot product of two vectors.
@@ -114,8 +103,7 @@ class Vector(Point):
         if theta is not None:
             return (self.magnitude() * vector.magnitude() *
                     math.degrees(math.cos(theta)))
-        return (reduce(lambda x, y: x + y,
-                [x * vector.to_list()[i] for i, x in enumerate(self.to_list())]))
+        return sum([a * b for a, b in zip(self, vector)])
 
     def cross(self, vector):
         """Return a Vector instance as the cross product of two vectors"""
@@ -125,11 +113,8 @@ class Vector(Point):
 
     def unit(self):
         """Return a Vector instance of the unit vector"""
-        return Vector(
-            (self.x / self.magnitude()),
-            (self.y / self.magnitude()),
-            (self.z / self.magnitude())
-        )
+        magnitude = self.magnitude()
+        return self.__class__(*[value/magnitude for value in self])
 
     def angle(self, vector):
         """Return the angle between two vectors in degrees."""
@@ -142,15 +127,11 @@ class Vector(Point):
 
     def parallel(self, vector):
         """Return True if vectors are parallel to each other."""
-        if self.cross(vector).magnitude() == 0:
-            return True
-        return False
+        return not any(self.cross(vector))
 
     def perpendicular(self, vector):
         """Return True if vectors are perpendicular to each other."""
-        if self.dot(vector) == 0:
-            return True
-        return False
+        return not self.dot(vector)
 
     def non_parallel(self, vector):
         """Return True if vectors are non-parallel.
@@ -158,8 +139,7 @@ class Vector(Point):
         Non-parallel vectors are vectors which are neither parallel
         nor perpendicular to each other.
         """
-        if (self.is_parallel(vector) is not True and
-                self.is_perpendicular(vector) is not True):
+        if self.parallel(vector) or self.perpendicular(vector):
             return True
         return False
 
@@ -186,15 +166,11 @@ class Vector(Point):
 
         return Vector(x, y, z)
 
-    def to_points(self):
-        '''Returns an array of [x,y,z] of the end points'''
-        return [self.x, self.y, self.z]
-
     @classmethod
     def from_points(cls, point1, point2):
         """Return a Vector instance from two given points."""
         if isinstance(point1, Point) and isinstance(point2, Point):
-            displacement = point1.substract(point2)
+            displacement = point1 - point2
             return cls(displacement.x, displacement.y, displacement.z)
         raise TypeError
 
