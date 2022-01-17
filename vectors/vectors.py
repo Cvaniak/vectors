@@ -3,14 +3,13 @@ from __future__ import division
 from functools import reduce
 import math
 from numbers import Real
+from collections import namedtuple
 
 
 class Point(object):
     """Point class: Represents a point in the x, y, z space."""
     def __init__(self, x, y, z=0):
-        self.x = x
-        self.y = y
-        self.z = z
+        self.values = (x, y, z)
 
     def __repr__(self):
         return '{0}({1}, {2}, {3})'.format(
@@ -57,6 +56,18 @@ class Point(object):
                 return Point(pt.x - self.x, pt.y - self.y, pt.z - self.z)
         else:
             raise TypeError
+        
+    @property
+    def x(self):
+        return self.values[0]
+
+    @property
+    def y(self):
+        return self.values[1]
+
+    @property
+    def z(self):
+        return self.values[2]
 
     @classmethod
     def from_list(cls, l):
