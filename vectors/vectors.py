@@ -5,69 +5,59 @@ import math
 from numbers import Real
 from collections import namedtuple
 
-
-class Point(object):
+class Point(namedtuple("Point", ["x", "y", "z"])):
     """Point class: Represents a point in the x, y, z space."""
-    def __init__(self, x, y, z=0):
-        self.values = (x, y, z)
+    # def __init__(self, x, y, z=0):
+    #     self.values = XYZ(x, y, z)
 
-    def __repr__(self):
-        return '{0}({1}, {2}, {3})'.format(
-            self.__class__.__name__,
-            self.x,
-            self.y,
-            self.z
-        )
+    # def __repr__(self):
+    #     return f"{self.__class__.__name__}{tuple(self.values)}"
 
-    def __sub__(self, point):
+    def __sub__(self, pt):
         """Return a Point instance as the displacement of two points."""
-        if type(point) is Point:
-            return self.substract(point)
-        else:
+        if not isinstance(pt, Point):
             raise TypeError
+        return Point(*[a-b for a, b in zip(self, pt)])
 
     def __add__(self, pt):
-        if isinstance(pt, Point):
-            if self.z and pt.z:
-                return Point(pt.x + self.x, pt.y + self.y, pt.z + self.z)
-            elif self.z:
-                return Point(pt.x + self.x, pt.y + self.y, self.z)
-            elif pt.z:
-                return Point(pt.x + self.x, pt.y + self.y, pt.z)
-            else:
-                return Point(pt.x + self.x, pt.y + self.y)
-        else:
+        if not isinstance(pt, Point):
             raise TypeError
+        return Point(*[a+b for a, b in zip(self, pt)])
 
-    def __eq__(self, pt):
-        return (
-            self.x == pt.x and
-            self.y == pt.y and
-            self.z == pt.z
-        )
+    # def __eq__(self, pt):
+    #     return self.values == pt.values
+
+    # def __iter__(self):
+    #     for xyz in self.values:
+    #         yield xyz
+
+    # def __getitem__(self, index):
+    #     return self.values[index]
+
+    # def __len__(self):
+    #     return len(self.values)
+
+    # def __contains__(self, item):
+    #     return item in self.values
+
+    # def to_dict(self):
+    #     return self.value._asdict()
 
     def to_list(self):
         '''Returns an array of [x,y,z] of the end points'''
-        return [self.x, self.y, self.z]
+        return list(self) 
 
-    def substract(self, pt):
-        """Return a Point instance as the displacement of two points."""
-        if isinstance(pt, Point):
-                return Point(pt.x - self.x, pt.y - self.y, pt.z - self.z)
-        else:
-            raise TypeError
-        
-    @property
-    def x(self):
-        return self.values[0]
+    # @property
+    # def x(self):
+    #     return self.values.x
 
-    @property
-    def y(self):
-        return self.values[1]
+    # @property
+    # def y(self):
+    #     return self.values.y
 
-    @property
-    def z(self):
-        return self.values[2]
+    # @property
+    # def z(self):
+    #     return self.values.z
 
     @classmethod
     def from_list(cls, l):
@@ -80,7 +70,6 @@ class Point(object):
             return cls(x, y)
         else:
             raise AttributeError
-
 
 class Vector(Point):
     """Vector class: Representing a vector in 3D space.
