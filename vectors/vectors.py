@@ -6,13 +6,6 @@ from numbers import Real
 from collections import namedtuple
 
 class Point(namedtuple("Point", ["x", "y", "z"])):
-    """Point class: Represents a point in the x, y, z space."""
-    # def __init__(self, x, y, z=0):
-    #     self.values = XYZ(x, y, z)
-
-    # def __repr__(self):
-    #     return f"{self.__class__.__name__}{tuple(self.values)}"
-
     def __sub__(self, pt):
         """Return a Point instance as the displacement of two points."""
         if not isinstance(pt, Point):
@@ -24,40 +17,9 @@ class Point(namedtuple("Point", ["x", "y", "z"])):
             raise TypeError
         return Point(*[a+b for a, b in zip(self, pt)])
 
-    # def __eq__(self, pt):
-    #     return self.values == pt.values
-
-    # def __iter__(self):
-    #     for xyz in self.values:
-    #         yield xyz
-
-    # def __getitem__(self, index):
-    #     return self.values[index]
-
-    # def __len__(self):
-    #     return len(self.values)
-
-    # def __contains__(self, item):
-    #     return item in self.values
-
-    # def to_dict(self):
-    #     return self.value._asdict()
-
     def to_list(self):
         '''Returns an array of [x,y,z] of the end points'''
         return list(self) 
-
-    # @property
-    # def x(self):
-    #     return self.values.x
-
-    # @property
-    # def y(self):
-    #     return self.values.y
-
-    # @property
-    # def z(self):
-    #     return self.values.z
 
     @classmethod
     def from_list(cls, l):
