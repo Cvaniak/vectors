@@ -154,7 +154,7 @@ class Vector(Point):
         is measured in degrees.
         """
         if theta is not None:
-            return self.magnitude() * vector.magnitude() * math.degrees(math.cos(theta))
+            return self.magnitude() * vector.magnitude() * math.cos(math.radians(theta))
         return sum([a * b for a, b in zip(self, vector)])
 
     def cross(self, vector):
