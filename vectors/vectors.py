@@ -170,11 +170,11 @@ class Vector(Point):
         magnitude = self.magnitude()
         return self.__class__(*[value / magnitude for value in self._values])
 
-    def angle(self, vector):
-        """Return the angle between two vectors in degrees."""
-        return math.degrees(
-            math.acos(self.dot(vector) / (self.magnitude() * vector.magnitude()))
-        )
+    def angle(self, vector, radians=False):
+        angle = math.acos(self.dot(vector) / (self.magnitude() * vector.magnitude()))
+        if radians is True:
+            return angle
+        return math.degrees(angle)
 
     def parallel(self, vector):
         """Return True if vectors are parallel to each other."""
@@ -196,11 +196,14 @@ class Vector(Point):
         return False
 
     # TODO: Not sure if it is okay to rotate around one axis after another
-    def rotate(self, angle, axis=(0, 0, 1)):
+    def rotate(self, angle, axis=(0, 0, 1), radians = False):
         """Returns the rotated vector. Assumes angle is in radians"""
         if not all(isinstance(a, int) for a in axis):
             raise ValueError
         x, y, z = self.x, self.y, self.z
+        if radians is not True:
+            angle = math.radians(angle)
+
 
         # Z axis rotation
         if axis[2]:
