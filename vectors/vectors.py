@@ -128,7 +128,7 @@ class Vector(Point):
         self._values = [value - number for value in self._values]
 
     def multiply(self, number):
-        if not isinstance(obj, Real):
+        if not isinstance(number, Real):
             raise TypeError
         self._values = [value * number for value in self._values]
 
