@@ -231,8 +231,11 @@ class Vector(Point):
         raise TypeError
 
     @classmethod
-    def spherical(cls, mag, theta, phi=0):
+    def spherical(cls, mag, theta, phi=0, radians=False):
         """Returns a Vector instance from spherical coordinates"""
+        if radians is not True:
+            phi, theta = math.radians(phi), math.radians(theta)
+
         return cls(
             mag * math.sin(phi) * math.cos(theta),
             mag * math.sin(phi) * math.sin(theta), 
@@ -240,6 +243,9 @@ class Vector(Point):
         )
 
     @classmethod
-    def cylindrical(cls, mag, theta, z=0):
+    def cylindrical(cls, mag, theta, z=0, radians=False):
         """Returns a Vector instance from cylindrical coordinates"""
+        if radians is not True:
+            theta = math.radians(theta)
+
         return cls(mag * math.cos(theta), mag * math.sin(theta), z)
