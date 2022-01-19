@@ -39,7 +39,7 @@ class Point:
         return item in self._values
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.x, self.y, self.z})"
+        return f"{self.__class__.__name__}{self.x, self.y, self.z}"
 
     def __sub__(self, pt):
         """Return a Point instance as the displacement of two points."""
